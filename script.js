@@ -110,3 +110,45 @@ window.addEventListener('load', function() {
     });
 });
 
+// Galerie interactive avec modal
+const galleryItems = document.querySelectorAll('.gallery-item');
+const photoModal = document.getElementById('photoModal');
+const modalImage = document.getElementById('modalImage');
+const modalText = document.getElementById('modalText');
+const closeBtn = document.querySelector('.close');
+
+// Ouvrir le modal au clic sur une photo
+galleryItems.forEach(item => {
+    item.addEventListener('click', function() {
+        const img = this.querySelector('img');
+        const text = this.getAttribute('data-text');
+        
+        modalImage.src = img.src;
+        modalText.textContent = text;
+        photoModal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Empêcher le scroll
+    });
+});
+
+// Fermer le modal au clic sur le X
+closeBtn.addEventListener('click', function() {
+    photoModal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Réactiver le scroll
+});
+
+// Fermer le modal en cliquant en dehors de l'image
+photoModal.addEventListener('click', function(event) {
+    if (event.target === photoModal) {
+        photoModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// Fermer le modal avec la touche Échap
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        photoModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+});
+
