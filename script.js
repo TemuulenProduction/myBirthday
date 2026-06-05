@@ -86,18 +86,3 @@ window.addEventListener('load', () => {
     }
 });
 
-// Gestion des images manquantes dans la galerie
-document.addEventListener('DOMContentLoaded', () => {
-    const galleryImages = document.querySelectorAll('.gallery-item img');
-    
-    galleryImages.forEach(img => {
-        img.addEventListener('error', function() {
-            // Si l'image ne peut pas être chargée, afficher un placeholder
-            this.style.backgroundColor = '#ddd';
-            this.alt = 'Image non trouvée';
-            this.style.display = 'flex';
-            this.style.alignItems = 'center';
-            this.style.justifyContent = 'center';
-        });
-    });
-});
