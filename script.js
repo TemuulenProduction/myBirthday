@@ -86,3 +86,27 @@ window.addEventListener('load', () => {
     }
 });
 
+// Gestion de la musique
+const musicToggle = document.getElementById('musicToggle');
+const birthdayMusic = document.getElementById('birthdayMusic');
+
+musicToggle.addEventListener('click', function() {
+    if (birthdayMusic.paused) {
+        birthdayMusic.play();
+        musicToggle.classList.add('playing');
+        musicToggle.textContent = '🔊 Musique (en cours)';
+    } else {
+        birthdayMusic.pause();
+        musicToggle.classList.remove('playing');
+        musicToggle.textContent = '🔊 Musique';
+    }
+});
+
+// Essayer de démarrer la musique automatiquement (peut ne pas fonctionner sur certains navigateurs)
+window.addEventListener('load', function() {
+    // Les navigateurs modernes requirent une interaction utilisateur pour lire l'audio
+    birthdayMusic.play().catch(() => {
+    console.log('Autoplay non autorisé');
+    });
+});
+

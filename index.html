@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎉 Compte à rebours Anniversaire</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Contrôle de la musique -->
+    <div class="music-player">
+        <button id="musicToggle" class="music-btn" title="Cliquez pour jouer la musique">
+            🔊 Musique
+        </button>
+    </div>
+
+    <audio id="birthdayMusic" loop>
+        <source src="audio/birthday.mp3" type="audio/mpeg">
+        <source src="audio/birthday.ogg" type="audio/ogg">
+        Votre navigateur ne supporte pas la lecture audio.
+    </audio>
+
 </head>
 <body>
     <!-- Confettis de fond -->
