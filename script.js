@@ -105,9 +105,9 @@ musicToggle.addEventListener('click', function() {
 // Essayer de démarrer la musique automatiquement (peut ne pas fonctionner sur certains navigateurs)
 window.addEventListener('load', function() {
     // Les navigateurs modernes requirent une interaction utilisateur pour lire l'audio
-    birthdayMusic.play().catch(() => {
-    console.log('Autoplay non autorisé');
-    });
+    //birthdayMusic.play().catch(() => {
+    //console.log('Autoplay non autorisé');
+    //});
 });
 
 // Galerie interactive avec modal
