@@ -152,3 +152,118 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
+// ========================================
+// SYSTÈME DE DÉVERROUILLAGE PROGRESSIF
+// ========================================
+
+function updateGalleryLocks() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to midnight
+    
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    let unlockedCount = 0;
+
+    galleryItems.forEach((item, index) => {
+        const unlockDateStr = item.getAttribute('data-unlock-date');
+        const unlockDate = new Date(unlockDateStr);
+        unlockDate.setHours(0, 0, 0, 0);
+        
+        const unlockDateElement = document.getElementById(`unlock-date-${index + 1}`);
+        
+        if (today >= unlockDate) {
+            // La photo est déverrouillée
+            item.classList.add('unlocked');
+            item.classList.remove('locked');
+            
+            if (unlockDateElement) {
+                unlockDateElement.textContent = '🔓 Déverrouillée!';
+            }
+            
+            // Ajouter l'événement au clic
+            if (!item.classList.contains('event-added')) {
+                item.addEventListener('click', openPhotoModal);
+                item.classList.add('event-added');
+            }
+            
+            unlockedCount++;
+        } else {
+            // La photo est verrouillée
+            item.classList.add('locked');
+            item.classList.remove('unlocked');
+            
+            // Calculer les jours jusqu'au déverrouillage
+            const daysUntil = Math.ceil((unlockDate - today) / (1000 * 60 * 60 * 24));
+            if (unlockDateElement) {
+                unlockDateElement.textContent = `Déverrouillée dans ${daysUntil} jour${daysUntil > 1 ? 's' : ''}`;
+            }
+            
+            // Retirer l'événement au clic
+            item.removeEventListener('click', openPhotoModal);
+            item.classList.remove('event-added');
+        }
+    });
+
+    // Afficher le statut global
+    const totalPhotos = galleryItems.length;
+    console.log(`📸 Galerie: ${unlockedCount}/${totalPhotos} photos déverrouillées`);
+}
+
+// Fonction pour ouvrir une photo (vérifier qu'elle n'est pas verrouillée)
+function openPhotoModal(event) {
+    const item = event.currentTarget;
+    
+    // Vérifier si la photo est verrouillée
+    if (item.classList.contains('locked')) {
+        showNotification('🔒 Cette photo n\'est pas encore déverrouillée!');
+        return;
+    }
+
+    const img = item.querySelector('img');
+    const text = item.getAttribute('data-text');
+    
+    modalImage.src = img.src;
+    modalText.textContent = text;
+    photoModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+// Fonction pour afficher les notifications
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'unlock-notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.classList.add('hide');
+        setTimeout(() => notification.remove(), 500);
+    }, 2000);
+}
+
+// Mettre à jour l'état des photos au chargement
+window.addEventListener('load', updateGalleryLocks);
+
+// Mettre à jour chaque minute pour les changements de jour
+setInterval(updateGalleryLocks, 60000);
+
+// Vérifier aussi à minuit
+function checkAtMidnight() {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const timeUntilMidnight = tomorrow - now;
+    setTimeout(() => {
+        updateGalleryLocks();
+        checkAtMidnight(); // Vérifier à nouveau demain
+    }, timeUntilMidnight);
+}
+
+checkAtMidnight();
+
+// Modifier les événements de la galerie
+const galleryItems = document.querySelectorAll('.gallery-item');
+galleryItems.forEach(item => {
+    // L'événement au clic sera ajouté dynamiquement par updateGalleryLocks
+});

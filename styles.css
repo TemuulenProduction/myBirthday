@@ -598,3 +598,101 @@ body {
         font-size: 1.5rem;
     }
 }
+
+/* Verrouillage des photos */
+.gallery-lock {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    font-size: 3rem;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.gallery-lock span {
+    font-size: 4rem;
+    margin-bottom: 10px;
+    animation: shake 0.5s ease-in-out infinite;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: rotate(-5deg);
+    }
+    50% {
+        transform: rotate(5deg);
+    }
+}
+
+.gallery-lock small {
+    font-size: 0.8rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Photo déverrouillée */
+.gallery-item.unlocked .gallery-lock {
+    display: none;
+}
+
+.gallery-item.unlocked {
+    cursor: pointer;
+}
+
+.gallery-item.locked {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.gallery-item.unlocked:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+}
+
+.unlock-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 50px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.5s ease-out;
+    z-index: 2000;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateX(-50%) translateY(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-50%) translateY(-100px);
+        opacity: 0;
+    }
+}
+
+.unlock-notification.hide {
+    animation: slideUp 0.5s ease-out forwards;
+}
