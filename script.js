@@ -1,5 +1,5 @@
 // Configuration de la date d'anniversaire
-const birthdayDate = new Date('2026-06-16T00:00:00').getTime();
+const birthdayDate = new Date('2026-06-16T00:00:00+09:00').getTime();
 
 // Fonction pour mettre à jour le décompte
 function updateCountdown() {
@@ -36,7 +36,9 @@ function updateCountdown() {
         celebrationMessage.style.display = 'block';
         
         // Arrêter le décompte
-        clearInterval(countdownInterval);
+        if (typeof countdownInterval !== 'undefined') {
+            clearInterval(countdownInterval);
+        }
         
         // Lancer les confettis
         launchConfetti();
@@ -73,67 +75,98 @@ function launchConfetti() {
     }
 }
 
-// Mise à jour initiale
-updateCountdown();
+// ========================================
+// SYSTÈME DE DÉVERROUILLAGE PROGRESSIF
+// ========================================
 
-// Mise à jour du décompte chaque seconde
-const countdownInterval = setInterval(updateCountdown, 1000);
+function updateGalleryLocks() {
+    // Créer une date en heure coréenne (UTC+9)
+    const now = new Date();
+    const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+    koreaTime.setHours(0, 0, 0, 0);
+    
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    let unlockedCount = 0;
 
-// Confettis au chargement (petit effet)
-window.addEventListener('load', () => {
-    if (birthdayDate - new Date().getTime() < 0) {
-        launchConfetti();
-    }
-});
+    galleryItems.forEach((item, index) => {
+        const unlockDateStr = item.getAttribute('data-unlock-date');
+        const unlockDate = new Date(unlockDateStr);
+        unlockDate.setHours(0, 0, 0, 0);
+        
+        const countdownElement = document.getElementById(`countdown-${index + 1}`);
+        
+        if (koreaTime >= unlockDate) {
+            // La photo est déverrouillée
+            item.classList.add('unlocked');
+            item.classList.remove('locked');
+            
+            // Ajouter l'événement au clic
+            if (!item.classList.contains('event-added')) {
+                item.addEventListener('click', openPhotoModal);
+                item.classList.add('event-added');
+            }
+            
+            unlockedCount++;
+        } else {
+            // La photo est verrouillée
+            item.classList.add('locked');
+            item.classList.remove('unlocked');
+            
+            // Calculer les jours jusqu'au déverrouillage
+            const daysUntil = Math.ceil((unlockDate - koreaTime) / (1000 * 60 * 60 * 24));
+            if (countdownElement) {
+                if (daysUntil === 1) {
+                    countdownElement.textContent = 'Tomorrow!';
+                } else if (daysUntil === 0) {
+                    countdownElement.textContent = 'Now!';
+                } else {
+                    countdownElement.textContent = `${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
+                }
+            }
+            
+            // Retirer l'événement au clic
+            item.removeEventListener('click', openPhotoModal);
+            item.classList.remove('event-added');
+        }
+    });
 
-// Gestion de la musique
-const musicToggle = document.getElementById('musicToggle');
-const birthdayMusic = document.getElementById('birthdayMusic');
+    // Afficher le statut global
+    const totalPhotos = galleryItems.length;
+    console.log(`📸 Gallery: ${unlockedCount}/${totalPhotos} photos unlocked`);
+}
 
-musicToggle.addEventListener('click', function() {
-    if (birthdayMusic.paused) {
-        birthdayMusic.play();
-        musicToggle.classList.add('playing');
-        musicToggle.textContent = '🔊 Musique (en cours)';
-    } else {
-        birthdayMusic.pause();
-        musicToggle.classList.remove('playing');
-        musicToggle.textContent = '🔊 Musique';
-    }
-});
+// ========================================
+// GESTION DU MODAL DES PHOTOS
+// ========================================
 
-// Essayer de démarrer la musique automatiquement (peut ne pas fonctionner sur certains navigateurs)
-window.addEventListener('load', function() {
-    // Les navigateurs modernes requirent une interaction utilisateur pour lire l'audio
-    //birthdayMusic.play().catch(() => {
-    //console.log('Autoplay non autorisé');
-    //});
-});
-
-// Galerie interactive avec modal
-const galleryItems = document.querySelectorAll('.gallery-item');
 const photoModal = document.getElementById('photoModal');
 const modalImage = document.getElementById('modalImage');
 const modalText = document.getElementById('modalText');
 const closeBtn = document.querySelector('.close');
 
-// Ouvrir le modal au clic sur une photo
-galleryItems.forEach(item => {
-    item.addEventListener('click', function() {
-        const img = this.querySelector('img');
-        const text = this.getAttribute('data-text');
-        
-        modalImage.src = img.src;
-        modalText.textContent = text;
-        photoModal.style.display = 'block';
-        document.body.style.overflow = 'hidden'; // Empêcher le scroll
-    });
-});
+// Fonction pour ouvrir une photo
+function openPhotoModal(event) {
+    const item = event.currentTarget;
+    
+    // Vérifier si la photo est verrouillée
+    if (item.classList.contains('locked')) {
+        showNotification('🔒 This photo is locked!');
+        return;
+    }
+
+    const img = item.querySelector('img');
+    const text = item.getAttribute('data-text');
+    
+    modalImage.src = img.src;
+    modalText.textContent = text;
+    photoModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
 
 // Fermer le modal au clic sur le X
 closeBtn.addEventListener('click', function() {
     photoModal.style.display = 'none';
-    document.body.style.overflow = 'auto'; // Réactiver le scroll
+    document.body.style.overflow = 'auto';
 });
 
 // Fermer le modal en cliquant en dehors de l'image
@@ -153,81 +186,28 @@ document.addEventListener('keydown', function(event) {
 });
 
 // ========================================
-// SYSTÈME DE DÉVERROUILLAGE PROGRESSIF
+// GESTION DE LA MUSIQUE
 // ========================================
 
-function updateGalleryLocks() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset to midnight
-    
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    let unlockedCount = 0;
+const musicToggle = document.getElementById('musicToggle');
+const birthdayMusic = document.getElementById('birthdayMusic');
 
-    galleryItems.forEach((item, index) => {
-        const unlockDateStr = item.getAttribute('data-unlock-date');
-        const unlockDate = new Date(unlockDateStr);
-        unlockDate.setHours(0, 0, 0, 0);
-        
-        const unlockDateElement = document.getElementById(`unlock-date-${index + 1}`);
-        
-        if (today >= unlockDate) {
-            // La photo est déverrouillée
-            item.classList.add('unlocked');
-            item.classList.remove('locked');
-            
-            if (unlockDateElement) {
-                unlockDateElement.textContent = '🔓 Déverrouillée!';
-            }
-            
-            // Ajouter l'événement au clic
-            if (!item.classList.contains('event-added')) {
-                item.addEventListener('click', openPhotoModal);
-                item.classList.add('event-added');
-            }
-            
-            unlockedCount++;
-        } else {
-            // La photo est verrouillée
-            item.classList.add('locked');
-            item.classList.remove('unlocked');
-            
-            // Calculer les jours jusqu'au déverrouillage
-            const daysUntil = Math.ceil((unlockDate - today) / (1000 * 60 * 60 * 24));
-            if (unlockDateElement) {
-                unlockDateElement.textContent = `Déverrouillée dans ${daysUntil} jour${daysUntil > 1 ? 's' : ''}`;
-            }
-            
-            // Retirer l'événement au clic
-            item.removeEventListener('click', openPhotoModal);
-            item.classList.remove('event-added');
-        }
-    });
-
-    // Afficher le statut global
-    const totalPhotos = galleryItems.length;
-    console.log(`📸 Galerie: ${unlockedCount}/${totalPhotos} photos déverrouillées`);
-}
-
-// Fonction pour ouvrir une photo (vérifier qu'elle n'est pas verrouillée)
-function openPhotoModal(event) {
-    const item = event.currentTarget;
-    
-    // Vérifier si la photo est verrouillée
-    if (item.classList.contains('locked')) {
-        showNotification('🔒 Cette photo n\'est pas encore déverrouillée!');
-        return;
+musicToggle.addEventListener('click', function() {
+    if (birthdayMusic.paused) {
+        birthdayMusic.play();
+        musicToggle.classList.add('playing');
+        musicToggle.textContent = '🔊 Music (Playing)';
+    } else {
+        birthdayMusic.pause();
+        musicToggle.classList.remove('playing');
+        musicToggle.textContent = '🔊 Music';
     }
+});
 
-    const img = item.querySelector('img');
-    const text = item.getAttribute('data-text');
-    
-    modalImage.src = img.src;
-    modalText.textContent = text;
-    photoModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
+// ========================================
+// FONCTION DE NOTIFICATION
+// ========================================
 
-// Fonction pour afficher les notifications
 function showNotification(message) {
     const notification = document.createElement('div');
     notification.className = 'unlock-notification';
@@ -240,30 +220,41 @@ function showNotification(message) {
     }, 2000);
 }
 
-// Mettre à jour l'état des photos au chargement
-window.addEventListener('load', updateGalleryLocks);
+// ========================================
+// INITIALISATION
+// ========================================
 
-// Mettre à jour chaque minute pour les changements de jour
+// Mise à jour initiale du décompte et des photos
+updateCountdown();
+updateGalleryLocks();
+
+// Mise à jour du décompte chaque seconde
+let countdownInterval = setInterval(updateCountdown, 1000);
+
+// Mettre à jour les photos chaque minute
 setInterval(updateGalleryLocks, 60000);
 
-// Vérifier aussi à minuit
+// Vérifier aussi à minuit (heure de Séoul)
 function checkAtMidnight() {
     const now = new Date();
-    const tomorrow = new Date(now);
+    const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+    const tomorrow = new Date(koreaTime);
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
 
-    const timeUntilMidnight = tomorrow - now;
+    const timeUntilMidnight = tomorrow - koreaTime;
     setTimeout(() => {
         updateGalleryLocks();
+        updateCountdown();
         checkAtMidnight(); // Vérifier à nouveau demain
     }, timeUntilMidnight);
 }
 
 checkAtMidnight();
 
-// Modifier les événements de la galerie
-const galleryItems = document.querySelectorAll('.gallery-item');
-galleryItems.forEach(item => {
-    // L'événement au clic sera ajouté dynamiquement par updateGalleryLocks
+// Confettis au chargement (petit effet)
+window.addEventListener('load', () => {
+    if (birthdayDate - new Date().getTime() < 0) {
+        launchConfetti();
+    }
 });
