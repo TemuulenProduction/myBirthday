@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Animation Cœur</title>
+
+    <link rel="stylesheet" href="heart_style.css">
+</head>
+
+<body>
+
+    <!-- Bouton retour -->
+    <button id="btn-back" onclick="window.location.href='index.html'">
+        ← Retour
+    </button>
+
+
+    <audio id="bg-music" loop>
+        <source src="audio/music_hamster.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-player">
+        <button id="musicToggle" class="music-btn">
+            🔊 Music
+        </button>
+    </div>
+
+
+    <!-- Cœur principal -->
+    <div id="main-heart">❤️</div>
+
+    <div class="anime-container">
+        <video class="anime-video" class="anime-video" autoplay loop muted playsinline>
+            <source src="images/animed_hamster.webm" type="video/webm">
+        </video>
+    </div>
+
+    <!-- Texte -->
+    <div class="title">This is a ticket for a restaurant with meeeee ❤️ </div>
+
+    
+
+    <script src="heart_script.js"></script>
+</body>
+</html>

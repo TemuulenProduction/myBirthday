@@ -146,7 +146,7 @@ musicToggle.addEventListener('click', function() {
     if (birthdayMusic.paused) {
         birthdayMusic.play();
         musicToggle.classList.add('playing');
-        musicToggle.textContent = '🔊 Music (Playing)';
+        musicToggle.textContent = '🔊 Pause Music';
     } else {
         birthdayMusic.pause();
         musicToggle.classList.remove('playing');

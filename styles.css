@@ -640,3 +640,37 @@ body {
     }
 
 }
+
+/* Bouton Send Love */
+#btn-heart-page {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2rem auto;
+    padding: 14px 36px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #e8507a, #c0294f);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 22px rgba(200, 40, 80, 0.45);
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: heartBtnPulse 2s ease-in-out infinite;
+}
+#btn-heart-page:hover {
+    transform: scale(1.07);
+    box-shadow: 0 8px 30px rgba(200, 40, 80, 0.6);
+}
+#btn-heart-page:active { transform: scale(0.97); }
+
+@keyframes heartBtnPulse {
+    0%, 100% { box-shadow: 0 4px 22px rgba(200, 40, 80, 0.45); }
+    50%       { box-shadow: 0 4px 36px rgba(200, 40, 80, 0.75); }
+}
+
+.heart-btn-section {
+    text-align: center;
+    margin: 1.5rem 0 2.5rem;
+}
