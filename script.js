@@ -75,65 +75,65 @@ function launchConfetti() {
     }
 }
 
-// ========================================
-// SYSTÈME DE DÉVERROUILLAGE PROGRESSIF
-// ========================================
+// // ========================================
+// // SYSTÈME DE DÉVERROUILLAGE PROGRESSIF
+// // ========================================
 
-function updateGalleryLocks() {
-    // Créer une date en heure coréenne (UTC+9)
-    const now = new Date();
-    const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-    koreaTime.setHours(0, 0, 0, 0);
+// function updateGalleryLocks() {
+//     // Créer une date en heure coréenne (UTC+9)
+//     const now = new Date();
+//     const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+//     koreaTime.setHours(0, 0, 0, 0);
     
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    let unlockedCount = 0;
+//     const galleryItems = document.querySelectorAll('.gallery-item');
+//     let unlockedCount = 0;
 
-    galleryItems.forEach((item, index) => {
-        const unlockDateStr = item.getAttribute('data-unlock-date');
-        const unlockDate = new Date(unlockDateStr);
-        unlockDate.setHours(0, 0, 0, 0);
+//     galleryItems.forEach((item, index) => {
+//         const unlockDateStr = item.getAttribute('data-unlock-date');
+//         const unlockDate = new Date(unlockDateStr);
+//         unlockDate.setHours(0, 0, 0, 0);
         
-        const countdownElement = document.getElementById(`countdown-${index + 1}`);
+//         const countdownElement = document.getElementById(`countdown-${index + 1}`);
         
-        if (koreaTime >= unlockDate) {
-            // La photo est déverrouillée
-            item.classList.add('unlocked');
-            item.classList.remove('locked');
+//         if (koreaTime >= unlockDate) {
+//             // La photo est déverrouillée
+//             item.classList.add('unlocked');
+//             item.classList.remove('locked');
             
-            // Ajouter l'événement au clic
-            if (!item.classList.contains('event-added')) {
-                item.addEventListener('click', openPhotoModal);
-                item.classList.add('event-added');
-            }
+//             // Ajouter l'événement au clic
+//             if (!item.classList.contains('event-added')) {
+//                 item.addEventListener('click', openPhotoModal);
+//                 item.classList.add('event-added');
+//             }
             
-            unlockedCount++;
-        } else {
-            // La photo est verrouillée
-            item.classList.add('locked');
-            item.classList.remove('unlocked');
+//             unlockedCount++;
+//         } else {
+//             // La photo est verrouillée
+//             item.classList.add('locked');
+//             item.classList.remove('unlocked');
             
-            // Calculer les jours jusqu'au déverrouillage
-            const daysUntil = Math.ceil((unlockDate - koreaTime) / (1000 * 60 * 60 * 24));
-            if (countdownElement) {
-                if (daysUntil === 1) {
-                    countdownElement.textContent = 'Tomorrow!';
-                } else if (daysUntil === 0) {
-                    countdownElement.textContent = 'Now!';
-                } else {
-                    countdownElement.textContent = `${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
-                }
-            }
+//             // Calculer les jours jusqu'au déverrouillage
+//             const daysUntil = Math.ceil((unlockDate - koreaTime) / (1000 * 60 * 60 * 24));
+//             if (countdownElement) {
+//                 if (daysUntil === 1) {
+//                     countdownElement.textContent = 'Tomorrow!';
+//                 } else if (daysUntil === 0) {
+//                     countdownElement.textContent = 'Now!';
+//                 } else {
+//                     countdownElement.textContent = `${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
+//                 }
+//             }
             
-            // Retirer l'événement au clic
-            item.removeEventListener('click', openPhotoModal);
-            item.classList.remove('event-added');
-        }
-    });
+//             // Retirer l'événement au clic
+//             item.removeEventListener('click', openPhotoModal);
+//             item.classList.remove('event-added');
+//         }
+//     });
 
-    // Afficher le statut global
-    const totalPhotos = galleryItems.length;
-    console.log(`📸 Gallery: ${unlockedCount}/${totalPhotos} photos unlocked`);
-}
+//     // Afficher le statut global
+//     const totalPhotos = galleryItems.length;
+//     console.log(`📸 Gallery: ${unlockedCount}/${totalPhotos} photos unlocked`);
+// }
 
 // ========================================
 // GESTION DU MODAL DES PHOTOS
