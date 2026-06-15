@@ -75,65 +75,17 @@ function launchConfetti() {
     }
 }
 
-// // ========================================
-// // SYSTÈME DE DÉVERROUILLAGE PROGRESSIF
-// // ========================================
+// ========================================
+// SYSTÈME DE DÉVERROUILLAGE PROGRESSIF
+// ========================================
 
-// function updateGalleryLocks() {
-//     // Créer une date en heure coréenne (UTC+9)
-//     const now = new Date();
-//     const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-//     koreaTime.setHours(0, 0, 0, 0);
-    
-//     const galleryItems = document.querySelectorAll('.gallery-item');
-//     let unlockedCount = 0;
-
-//     galleryItems.forEach((item, index) => {
-//         const unlockDateStr = item.getAttribute('data-unlock-date');
-//         const unlockDate = new Date(unlockDateStr);
-//         unlockDate.setHours(0, 0, 0, 0);
-        
-//         const countdownElement = document.getElementById(`countdown-${index + 1}`);
-        
-//         if (koreaTime >= unlockDate) {
-//             // La photo est déverrouillée
-//             item.classList.add('unlocked');
-//             item.classList.remove('locked');
-            
-//             // Ajouter l'événement au clic
-//             if (!item.classList.contains('event-added')) {
-//                 item.addEventListener('click', openPhotoModal);
-//                 item.classList.add('event-added');
-//             }
-            
-//             unlockedCount++;
-//         } else {
-//             // La photo est verrouillée
-//             item.classList.add('locked');
-//             item.classList.remove('unlocked');
-            
-//             // Calculer les jours jusqu'au déverrouillage
-//             const daysUntil = Math.ceil((unlockDate - koreaTime) / (1000 * 60 * 60 * 24));
-//             if (countdownElement) {
-//                 if (daysUntil === 1) {
-//                     countdownElement.textContent = 'Tomorrow!';
-//                 } else if (daysUntil === 0) {
-//                     countdownElement.textContent = 'Now!';
-//                 } else {
-//                     countdownElement.textContent = `${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
-//                 }
-//             }
-            
-//             // Retirer l'événement au clic
-//             item.removeEventListener('click', openPhotoModal);
-//             item.classList.remove('event-added');
-//         }
-//     });
-
-//     // Afficher le statut global
-//     const totalPhotos = galleryItems.length;
-//     console.log(`📸 Gallery: ${unlockedCount}/${totalPhotos} photos unlocked`);
-// }
+function updateGalleryLocks() {
+    document.querySelectorAll('.gallery-item').forEach(item => {
+        item.classList.remove('locked');
+        item.classList.add('unlocked');
+        item.addEventListener('click', openPhotoModal);
+    });
+}
 
 // ========================================
 // GESTION DU MODAL DES PHOTOS
@@ -147,18 +99,16 @@ const closeBtn = document.querySelector('.close');
 // Fonction pour ouvrir une photo
 function openPhotoModal(event) {
     const item = event.currentTarget;
-    
-    // Vérifier si la photo est verrouillée
-    if (item.classList.contains('locked')) {
-        showNotification('🔒 This photo is locked!');
-        return;
-    }
+    if (!item) return;
 
     const img = item.querySelector('img');
-    const text = item.getAttribute('data-text');
-    
+    const text = item.getAttribute('data-text') || '';
+
+    if (!img) return;
+
     modalImage.src = img.src;
     modalText.textContent = text;
+
     photoModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
@@ -224,37 +174,46 @@ function showNotification(message) {
 // INITIALISATION
 // ========================================
 
-// Mise à jour initiale du décompte et des photos
-updateCountdown();
-updateGalleryLocks();
+document.addEventListener('DOMContentLoaded', () => {
 
-// Mise à jour du décompte chaque seconde
-let countdownInterval = setInterval(updateCountdown, 1000);
+    // Mise à jour initiale
+    updateCountdown();
+    updateGalleryLocks();
 
-// Mettre à jour les photos chaque minute
-setInterval(updateGalleryLocks, 60000);
+    // Décompte chaque seconde
+    const countdownInterval = setInterval(updateCountdown, 1000);
 
-// Vérifier aussi à minuit (heure de Séoul)
-function checkAtMidnight() {
-    const now = new Date();
-    const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-    const tomorrow = new Date(koreaTime);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
+    // Photos (pas besoin de refresh toutes les minutes si c'est statique, mais ok si tu veux garder)
+    const galleryInterval = setInterval(updateGalleryLocks, 60000);
 
-    const timeUntilMidnight = tomorrow - koreaTime;
-    setTimeout(() => {
-        updateGalleryLocks();
-        updateCountdown();
-        checkAtMidnight(); // Vérifier à nouveau demain
-    }, timeUntilMidnight);
-}
+    // Gestion minuit heure de Séoul (corrigée)
+    function checkAtMidnight() {
+        const now = new Date();
 
-checkAtMidnight();
+        const koreaTime = new Date(
+            now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' })
+        );
 
-// Confettis au chargement (petit effet)
-window.addEventListener('load', () => {
-    if (birthdayDate - new Date().getTime() < 0) {
-        launchConfetti();
+        const tomorrow = new Date(koreaTime);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        const timeUntilMidnight = tomorrow.getTime() - koreaTime.getTime();
+
+        setTimeout(() => {
+            updateGalleryLocks();
+            updateCountdown();
+            checkAtMidnight(); // boucle quotidienne
+        }, timeUntilMidnight);
     }
+
+    checkAtMidnight();
+
+    // Confettis au chargement
+    window.addEventListener('load', () => {
+        if (new Date().getTime() > birthdayDate) {
+            launchConfetti();
+        }
+    });
+
 });
